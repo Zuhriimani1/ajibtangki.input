@@ -649,6 +649,7 @@
                         showLoginContainer(false);
                         showDashboardContainer(true);
                         currentUser = result.user;
+                        isLoggedIn = true;
                         $('#usernameDisplay').text(currentUser.username);
                         loadDashboardData();
                     } else {
@@ -666,6 +667,7 @@
             showLoginContainer(true);
             showDashboardContainer(false);
             currentUser = null;
+            isLoggedIn = false;
             $('#loginForm')[0].reset();
             $('#loginAlert').addClass('d-none');
         }
