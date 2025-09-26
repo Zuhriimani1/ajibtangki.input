@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajib Tangki - Sistem Manajemen Bisnis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+        }
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+        .table-responsive {
+            margin-top: 1rem;
+        }
+        .alert {
+            margin-top: 1rem;
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        .google-maps-link {
+            color: #4285f4;
+            text-decoration: none;
+        }
+        .google-maps-link:hover {
+            text-decoration: underline;
+        }
+        .loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Login Form -->
+    <div id="loginContainer" class="container">
+        <div class="login-container">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4><i class="fas fa-truck"></i> Ajib Tangki</h4>
+                    <p class="mb-0">Sistem Manajemen Bisnis</p>
+                </div>
+                <div class="card-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-sign-in-alt"></i> Masuk
+                        </button>
+                    </form>
+                    <div id="loginAlert" class="alert alert-danger mt-3 d-none"></div>
+                </div>
+                <div class="card-footer text-center text-muted">
+                    <small>Default: admin / admin123</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <div id="dashboardContainer" class="container-fluid d-none">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h1><i class="fas fa-truck"></i> Ajib Tangki</h1>
+                        <p>Sistem Manajemen Bisnis</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <span id="userInfo">Selamat datang, <span id="usernameDisplay"></span></span>
+                        <button class="btn btn-outline-light ms-2" onclick="logout()">
+                            <i class="fas fa-sign-out-alt"></i> Keluar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="penjualan-tab" data-bs-toggle="tab" data-bs-target="#penjualan" type="button" role="tab">
+                        <i class="fas fa-shopping-cart"></i> Penjualan
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pengeluaran-tab" data-bs-toggle="tab" data-bs-target="#pengeluaran" type="button" role="tab">
+                        <i class="fas fa-credit-card"></i> Pengeluaran
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="produk-tab" data-bs-toggle="tab" data-bs-target="#produk" type="button" role="tab">
+                        <i class="fas fa-box"></i> Produk
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="pelanggan-tab" data-bs-toggle="tab" data-bs-target="#pelanggan" type="button" role="tab">
+                        <i class="fas fa-users"></i> Pelanggan
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="laba-rugi-tab" data-bs-toggle="tab" data-bs-target="#laba-rugi" type="button" role="tab">
+                        <i class="fas fa-chart-line"></i> Laba Rugi
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="rekap-rit-tab" data-bs-toggle="tab" data-bs-target="#rekap-rit" type="button" role="tab">
+                        <i class="fas fa-route"></i> Rekap Rit
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab" data-bs-target="#settings" type="button" role="tab">
+                        <i class="fas fa-cog"></i> Pengaturan
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="mainTabContent">
+                <!-- Dashboard Tab -->
+                <div class="tab-pane fade show active" id="dashboard" role="tabpanel">
+                    <div class="row mt-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-shopping-cart fa-2x text-success"></i>
+                                    <h5 class="card-title mt-2">Total Penjualan</h5>
+                                    <h3 id="totalPenjualan" class="text-success">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-credit-card fa-2x text-danger"></i>
+                                    <h5 class="card-title mt-2">Total Pengeluaran</h5>
+                                    <h3 id="totalPengeluaran" class="text-danger">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-chart-line fa-2x text-info"></i>
+                                    <h5 class="card-title mt-2">Laba Kotor</h5>
+                                    <h3 id="labaKotor" class="text-info">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <i class="fas fa-box fa-2x text-warning"></i>
+                                    <h5 class="card-title mt-2">Total Produk</h5>
+                                    <h3 id="totalProduk" class="text-warning">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-star"></i> Produk Terlaris</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="topProduk">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-users"></i> Pelanggan Terbaik</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="topPelanggan">Loading...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Penjualan Tab -->
+                <div class="tab-pane fade" id="penjualan" role="tabpanel">
+                    <div class="form-section">
+                        <h4>Input Penjualan Baru</h4>
+                        <form id="penjualanForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="penjualanTanggal" class="form-label">Tanggal</label>
+                                    <input type="date" class="form-control" id="penjualanTanggal" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="penjualanPelanggan" class="form-label">Pelanggan</label>
+                                    <select class="form-control" id="penjualanPelanggan" required>
+                                        <option value="">Pilih Pelanggan</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="penjualanProduk" class="form-label">Produk</label>
+                                    <select class="form-control" id="penjualanProduk" required>
+                                        <option value="">Pilih Produk</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-1">
+                                    <label for="penjualanJumlah" class="form-label">Jumlah</label>
+                                    <input type="number" class="form-control" id="penjualanJumlah" min="1" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="penjualanHarga" class="form-label">Harga Satuan</label>
+                                    <input type="number" class="form-control" id="penjualanHarga" min="0" step="0.01" required>
+                                </div>
+                                <div class="col-md-1">
+                                    <label for="penjualanRit" class="form-label">Rit</label>
+                                    <input type="number" class="form-control" id="penjualanRit" min="1" required>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-2">
+                                    <label for="penjualanTotal" class="form-label">Total</label>
+                                    <input type="number" class="form-control" id="penjualanTotal" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary d-block w-100">
+                                        <i class="fas fa-plus"></i> Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="penjualanAlert" class="alert mt-3 d-none"></div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="penjualanTable" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Pelanggan</th>
+                                    <th>Produk</th>
+                                    <th>Jumlah</th>
+                                    <th>Harga</th>
+                                    <th>Total</th>
+                                    <th>Rit</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pengeluaran Tab -->
+                <div class="tab-pane fade" id="pengeluaran" role="tabpanel">
+                    <div class="form-section">
+                        <h4>Input Pengeluaran Baru</h4>
+                        <form id="pengeluaranForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="pengeluaranTanggal" class="form-label">Tanggal</label>
+                                    <input type="date" class="form-control" id="pengeluaranTanggal" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="pengeluaranKategori" class="form-label">Kategori</label>
+                                    <select class="form-control" id="pengeluaranKategori" required>
+                                        <option value="">Pilih Kategori</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="pengeluaranJumlah" class="form-label">Jumlah</label>
+                                    <input type="number" class="form-control" id="pengeluaranJumlah" min="0" step="0.01" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="pengeluaranDeskripsi" class="form-label">Deskripsi</label>
+                                    <input type="text" class="form-control" id="pengeluaranDeskripsi" required>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-plus"></i> Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="pengeluaranAlert" class="alert mt-3 d-none"></div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="pengeluaranTable" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Kategori</th>
+                                    <th>Jumlah</th>
+                                    <th>Deskripsi</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Produk Tab -->
+                <div class="tab-pane fade" id="produk" role="tabpanel">
+                    <div class="form-section">
+                        <h4>Tambah Produk Baru</h4>
+                        <form id="produkForm">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="produkNama" class="form-label">Nama Produk</label>
+                                    <input type="text" class="form-control" id="produkNama" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="produkHarga" class="form-label">Harga</label>
+                                    <input type="number" class="form-control" id="produkHarga" min="0" step="0.01" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="produkSatuan" class="form-label">Satuan</label>
+                                    <input type="text" class="form-control" id="produkSatuan" placeholder="Liter, Kg, dll" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary d-block w-100">
+                                        <i class="fas fa-plus"></i> Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="produkAlert" class="alert mt-3 d-none"></div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="produkTable" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Harga</th>
+                                    <th>Satuan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pelanggan Tab -->
+                <div class="tab-pane fade" id="pelanggan" role="tabpanel">
+                    <div class="form-section">
+                        <h4>Tambah Pelanggan Baru</h4>
+                        <form id="pelangganForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="pelangganNama" class="form-label">Nama</label>
+                                    <input type="text" class="form-control" id="pelangganNama" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="pelangganAlamat" class="form-label">Alamat</label>
+                                    <input type="text" class="form-control" id="pelangganAlamat" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="pelangganTelepon" class="form-label">Telepon</label>
+                                    <input type="tel" class="form-control" id="pelangganTelepon" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="pelangganEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="pelangganEmail">
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary d-block w-100">
+                                        <i class="fas fa-plus"></i> Tambah
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="pelangganAlert" class="alert mt-3 d-none"></div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="pelangganTable" class="table table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Alamat</th>
+                                    <th>Telepon</th>
+                                    <th>Email</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Laba Rugi Tab -->
+                <div class="tab-pane fade" id="laba-rugi" role="tabpanel">
+                    <div class="form-section">
+                        <h4>Filter Laba Rugi</h4>
+                        <form id="labaRugiFilterForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="labaRugiStartDate" class="form-label">Tanggal Mulai</label>
+                                    <input type="date" class="form-control" id="labaRugiStartDate" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="labaRugiEndDate" class="form-label">Tanggal Akhir</label>
+                                    <input type="date" class="form-control" id="labaRugiEndDate" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary d-block w-100">
+                                        <i class="fas fa-search"></i> Hitung
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="labaRugiAlert" class="alert mt-3 d-none"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="text-success">Total Penjualan</h5>
+                                    <h3 id="labaRugiPenjualan" class="text-success">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="text-danger">Total Pengeluaran</h5>
+                                    <h3 id="labaRugiPengeluaran" class="text-danger">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="text-info">Laba Kotor</h5>
+                                    <h3 id="labaRugiKotor" class="text-info">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rekap Rit Tab -->
+                <div class="tab-pane fade" id="rekap-rit" role="tabpanel">
+                    <div class="form-section">
+                        <h4>Filter Rekap Rit</h4>
+                        <form id="rekapRitFilterForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label for="rekapRitStartDate" class="form-label">Tanggal Mulai</label>
+                                    <input type="date" class="form-control" id="rekapRitStartDate" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="rekapRitEndDate" class="form-label">Tanggal Akhir</label>
+                                    <input type="date" class="form-control" id="rekapRitEndDate" required>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary d-block w-100">
+                                        <i class="fas fa-search"></i> Hitung
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        <div id="rekapRitAlert" class="alert mt-3 d-none"></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="text-primary">Total Rit</h5>
+                                    <h3 id="rekapRitTotal" class="text-primary">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="text-success">Total Retase</h5>
+                                    <h3 id="rekapRitRetase" class="text-success">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h5 class="text-warning">Rata-rata per Rit</h5>
+                                    <h3 id="rekapRitRata" class="text-warning">Loading...</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-pane fade" id="settings" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5><i class="fas fa-tags"></i> Kategori Pengeluaran</h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="kategoriPengeluaranForm">
+                                        <div class="mb-3">
+                                            <label for="kategoriPengeluaranNama" class="form-label">Nama Kategori</label>
+                                            <input type="text" class="form-control" id="kategoriPengeluaranNama" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-plus"></i> Tambah Kategori
+                                        </button>
+                                    </form>
+                                    <div id="kategoriPengeluaranAlert" class="alert mt-3 d-none"></div>
+                                    <div class="mt-3">
+                                        <h6>Daftar Kategori:</h6>
+                                        <div id="kategoriPengeluaranList">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Edit Forms -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalTitle">Edit Data</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="editModalBody">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="saveEditBtn">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // Initialize app
+        $(document).ready(function() {
+            // Set default dates
+            const today = new Date().toISOString().split('T')[0];
+            $('#penjualanTanggal, #pengeluaranTanggal, #labaRugiStartDate, #labaRugiEndDate, #rekapRitStartDate, #rekapRitEndDate').val(today);
+
+            // Login form handler
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                login();
+            });
+
+            // Auto calculate total penjualan
+            $('#penjualanJumlah, #penjualanHarga').on('input', calculateTotal);
+
+            // Load initial data
+            loadDashboardData();
+            loadPelanggan();
+            loadProduk();
+            loadKategoriPengeluaran();
+            loadTables();
+
+            // Set up periodic refresh for dashboard
+            setInterval(loadDashboardData, 60000); // Refresh every minute
+        });
+
+        // Authentication functions
+        function login() {
+            const username = $('#username').val();
+            const password = $('#password').val();
+
+            if (!username || !password) {
+                showAlert('loginAlert', 'danger', 'Username dan password harus diisi');
+                return;
+            }
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showLoading(false);
+                    if (result) {
+                        showLoginContainer(false);
+                        showDashboardContainer(true);
+                        currentUser = result.user;
+                        isLoggedIn = true;
+                        $('#usernameDisplay').text(currentUser.username);
+                        loadDashboardData();
+                    } else {
+                        showAlert('loginAlert', 'danger', 'Username atau password salah');
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('loginAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .authenticateUser(username, password);
+        }
+
+        function logout() {
+            showLoginContainer(true);
+            showDashboardContainer(false);
+            currentUser = null;
+            isLoggedIn = false;
+            $('#loginForm')[0].reset();
+            $('#loginAlert').addClass('d-none');
+        }
+
+        function showLoginContainer(show) {
+            if (show) {
+                $('#loginContainer').removeClass('d-none');
+            } else {
+                $('#loginContainer').addClass('d-none');
+            }
+        }
+
+        function showDashboardContainer(show) {
+            if (show) {
+                $('#dashboardContainer').removeClass('d-none');
+            } else {
+                $('#dashboardContainer').addClass('d-none');
+            }
+        }
+
+        function showLoading(show) {
+            if (show) {
+                $('#loading').show();
+            } else {
+                $('#loading').hide();
+            }
+        }
+
+        function showAlert(alertId, type, message) {
+            const alert = $('#' + alertId);
+            alert.removeClass('alert-success alert-danger alert-info d-none').addClass('alert-' + type);
+            alert.text(message);
+        }
+
+        function calculateTotal() {
+            const jumlah = parseFloat($('#penjualanJumlah').val()) || 0;
+            const harga = parseFloat($('#penjualanHarga').val()) || 0;
+            const total = jumlah * harga;
+            $('#penjualanTotal').val(total.toFixed(2));
+        }
+
+        // CRUD Functions
+        function createPenjualan() {
+            const data = {
+                tanggal: $('#penjualanTanggal').val(),
+                pelangganId: $('#penjualanPelanggan').val(),
+                produkId: $('#penjualanProduk').val(),
+                jumlah: parseFloat($('#penjualanJumlah').val()),
+                harga: parseFloat($('#penjualanHarga').val()),
+                rit: parseInt($('#penjualanRit').val())
+            };
+
+            if (!validatePenjualan(data)) return;
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showLoading(false);
+                    if (result.success) {
+                        showAlert('penjualanAlert', 'success', result.message);
+                        $('#penjualanForm')[0].reset();
+                        calculateTotal();
+                        loadTables();
+                        loadDashboardData();
+                    } else {
+                        showAlert('penjualanAlert', 'danger', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('penjualanAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .createPenjualan(data.tanggal, data.pelangganId, data.produkId, data.jumlah, data.harga, data.rit);
+        }
+
+        function createPengeluaran() {
+            const data = {
+                tanggal: $('#pengeluaranTanggal').val(),
+                kategoriId: $('#pengeluaranKategori').val(),
+                jumlah: parseFloat($('#pengeluaranJumlah').val()),
+                deskripsi: $('#pengeluaranDeskripsi').val()
+            };
+
+            if (!validatePengeluaran(data)) return;
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showLoading(false);
+                    if (result.success) {
+                        showAlert('pengeluaranAlert', 'success', result.message);
+                        $('#pengeluaranForm')[0].reset();
+                        loadTables();
+                        loadDashboardData();
+                    } else {
+                        showAlert('pengeluaranAlert', 'danger', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('pengeluaranAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .createPengeluaran(data.tanggal, data.kategoriId, data.jumlah, data.deskripsi);
+        }
+
+        function createProduk() {
+            const data = {
+                nama: $('#produkNama').val(),
+                harga: parseFloat($('#produkHarga').val()),
+                satuan: $('#produkSatuan').val()
+            };
+
+            if (!validateProduk(data)) return;
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showLoading(false);
+                    if (result.success) {
+                        showAlert('produkAlert', 'success', result.message);
+                        $('#produkForm')[0].reset();
+                        loadProduk();
+                        loadTables();
+                    } else {
+                        showAlert('produkAlert', 'danger', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('produkAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .createProduk(data.nama, data.harga, data.satuan);
+        }
+
+        function createPelanggan() {
+            const data = {
+                nama: $('#pelangganNama').val(),
+                alamat: $('#pelangganAlamat').val(),
+                telepon: $('#pelangganTelepon').val(),
+                email: $('#pelangganEmail').val()
+            };
+
+            if (!validatePelanggan(data)) return;
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showLoading(false);
+                    if (result.success) {
+                        showAlert('pelangganAlert', 'success', result.message);
+                        $('#pelangganForm')[0].reset();
+                        loadPelanggan();
+                    } else {
+                        showAlert('pelangganAlert', 'danger', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('pelangganAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .createPelanggan(data.nama, data.alamat, data.telepon, data.email);
+        }
+
+        function createKategoriPengeluaran() {
+            const nama = $('#kategoriPengeluaranNama').val();
+
+            if (!nama) {
+                showAlert('kategoriPengeluaranAlert', 'danger', 'Nama kategori harus diisi');
+                return;
+            }
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(result) {
+                    showLoading(false);
+                    if (result.success) {
+                        showAlert('kategoriPengeluaranAlert', 'success', result.message);
+                        $('#kategoriPengeluaranNama').val('');
+                        loadKategoriPengeluaran();
+                    } else {
+                        showAlert('kategoriPengeluaranAlert', 'danger', result.message);
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('kategoriPengeluaranAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .createKategoriPengeluaran(nama);
+        }
+
+        // Validation functions
+        function validatePenjualan(data) {
+            if (!data.tanggal || !data.pelangganId || !data.produkId || !data.jumlah || !data.harga || !data.rit) {
+                showAlert('penjualanAlert', 'danger', 'Semua field harus diisi');
+                return false;
+            }
+            if (data.jumlah <= 0) {
+                showAlert('penjualanAlert', 'danger', 'Jumlah harus lebih besar dari 0');
+                return false;
+            }
+            if (data.harga <= 0) {
+                showAlert('penjualanAlert', 'danger', 'Harga harus lebih besar dari 0');
+                return false;
+            }
+            if (data.rit <= 0) {
+                showAlert('penjualanAlert', 'danger', 'Rit harus lebih besar dari 0');
+                return false;
+            }
+            return true;
+        }
+
+        function validatePengeluaran(data) {
+            if (!data.tanggal || !data.kategoriId || !data.jumlah || !data.deskripsi) {
+                showAlert('pengeluaranAlert', 'danger', 'Semua field harus diisi');
+                return false;
+            }
+            if (data.jumlah <= 0) {
+                showAlert('pengeluaranAlert', 'danger', 'Jumlah harus lebih besar dari 0');
+                return false;
+            }
+            return true;
+        }
+
+        function validateProduk(data) {
+            if (!data.nama || !data.harga || !data.satuan) {
+                showAlert('produkAlert', 'danger', 'Semua field harus diisi');
+                return false;
+            }
+            if (data.harga <= 0) {
+                showAlert('produkAlert', 'danger', 'Harga harus lebih besar dari 0');
+                return false;
+            }
+            return true;
+        }
+
+        function validatePelanggan(data) {
+            if (!data.nama || !data.alamat || !data.telepon) {
+                showAlert('pelangganAlert', 'danger', 'Nama, alamat, dan telepon harus diisi');
+                return false;
+            }
+            return true;
+        }
+
+        // Load functions
+        function loadDashboardData() {
+            if (!isLoggedIn) return;
+
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    $('#totalPenjualan').text(formatCurrency(data.totalPenjualan));
+                    $('#totalPengeluaran').text(formatCurrency(data.totalPengeluaran));
+                    $('#labaKotor').text(formatCurrency(data.labaKotor));
+                    $('#totalProduk').text(data.totalProduk);
+
+                    let topProdukHtml = '<ul class="list-group list-group-flush">';
+                    data.topProduk.forEach(function(produk) {
+                        topProdukHtml += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${produk.nama}
+                            <span class="badge bg-success rounded-pill">${formatCurrency(produk.total)}</span>
+                        </li>`;
+                    });
+                    topProdukHtml += '</ul>';
+                    $('#topProduk').html(topProdukHtml);
+
+                    let topPelangganHtml = '<ul class="list-group list-group-flush">';
+                    data.topPelanggan.forEach(function(pelanggan) {
+                        topPelangganHtml += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                            ${pelanggan.nama}
+                            <span class="badge bg-primary rounded-pill">${formatCurrency(pelanggan.total)}</span>
+                        </li>`;
+                    });
+                    topPelangganHtml += '</ul>';
+                    $('#topPelanggan').html(topPelangganHtml);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading dashboard data:', error);
+                })
+                .getDashboardData();
+        }
+
+        function loadPelanggan() {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    const pelangganSelect = $('#penjualanPelanggan');
+                    pelangganSelect.empty();
+                    pelangganSelect.append('<option value="">Pilih Pelanggan</option>');
+
+                    data.forEach(function(pelanggan) {
+                        pelangganSelect.append(`<option value="${pelanggan.ID}">${pelanggan.Nama}</option>`);
+                    });
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading pelanggan:', error);
+                })
+                .getAllPelanggan();
+        }
+
+        function loadProduk() {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    const produkSelect = $('#penjualanProduk');
+                    produkSelect.empty();
+                    produkSelect.append('<option value="">Pilih Produk</option>');
+
+                    data.forEach(function(produk) {
+                        produkSelect.append(`<option value="${produk.ID}" data-harga="${produk.Harga}">${produk.Nama} - ${formatCurrency(produk.Harga)}</option>`);
+                    });
+
+                    // Update harga when produk selected
+                    produkSelect.on('change', function() {
+                        const selectedOption = $(this).find(':selected');
+                        const harga = selectedOption.data('harga') || 0;
+                        $('#penjualanHarga').val(harga);
+                        calculateTotal();
+                    });
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading produk:', error);
+                })
+                .getAllProduk();
+        }
+
+        function loadKategoriPengeluaran() {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    const kategoriSelect = $('#pengeluaranKategori');
+                    kategoriSelect.empty();
+                    kategoriSelect.append('<option value="">Pilih Kategori</option>');
+
+                    let kategoriListHtml = '<ul class="list-group">';
+                    data.forEach(function(kategori) {
+                        kategoriSelect.append(`<option value="${kategori.ID}">${kategori.Nama}</option>`);
+                        kategoriListHtml += `<li class="list-group-item">${kategori.Nama}</li>`;
+                    });
+                    kategoriListHtml += '</ul>';
+                    $('#kategoriPengeluaranList').html(kategoriListHtml);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading kategori pengeluaran:', error);
+                })
+                .getAllKategoriPengeluaran();
+        }
+
+        function loadTables() {
+            loadPenjualanTable();
+            loadPengeluaranTable();
+            loadProdukTable();
+            loadPelangganTable();
+        }
+
+        function loadPenjualanTable() {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    const tbody = $('#penjualanTable tbody');
+                    tbody.empty();
+
+                    data.forEach(function(item) {
+                        tbody.append(`
+                            <tr>
+                                <td>${formatDate(item.Tanggal)}</td>
+                                <td>${item.PelangganNama || 'Unknown'}</td>
+                                <td>${item.ProdukNama || 'Unknown'}</td>
+                                <td>${item.Jumlah}</td>
+                                <td>${formatCurrency(item.Harga)}</td>
+                                <td>${formatCurrency(item.Total)}</td>
+                                <td>${item.Rit}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="editPenjualan('${item.ID}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deletePenjualan('${item.ID}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+                    $('#penjualanTable').DataTable();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading penjualan table:', error);
+                })
+                .getAllPenjualan();
+        }
+
+        function loadPengeluaranTable() {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    const tbody = $('#pengeluaranTable tbody');
+                    tbody.empty();
+
+                    data.forEach(function(item) {
+                        tbody.append(`
+                            <tr>
+                                <td>${formatDate(item.Tanggal)}</td>
+                                <td>${item.KategoriNama || 'Unknown'}</td>
+                                <td>${formatCurrency(item.Jumlah)}</td>
+                                <td>${item.Deskripsi}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="editPengeluaran('${item.ID}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deletePengeluaran('${item.ID}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+                    $('#pengeluaranTable').DataTable();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading pengeluaran table:', error);
+                })
+                .getAllPengeluaran();
+        }
+
+        function loadProdukTable() {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    const tbody = $('#produkTable tbody');
+                    tbody.empty();
+
+                    data.forEach(function(item) {
+                        tbody.append(`
+                            <tr>
+                                <td>${item.Nama}</td>
+                                <td>${formatCurrency(item.Harga)}</td>
+                                <td>${item.Satuan}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="editProduk('${item.ID}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteProduk('${item.ID}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+                    $('#produkTable').DataTable();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading produk table:', error);
+                })
+                .getAllProduk();
+        }
+
+        function loadPelangganTable() {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    const tbody = $('#pelangganTable tbody');
+                    tbody.empty();
+
+                    data.forEach(function(item) {
+                        const mapsLink = generateGoogleMapsLink(item.Alamat);
+                        tbody.append(`
+                            <tr>
+                                <td>${item.Nama}</td>
+                                <td><a href="${mapsLink}" target="_blank" class="google-maps-link">${item.Alamat}</a></td>
+                                <td>${item.Telepon}</td>
+                                <td>${item.Email || '-'}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="editPelanggan('${item.ID}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deletePelanggan('${item.ID}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `);
+                    });
+
+                    $('#pelangganTable').DataTable();
+                })
+                .withFailureHandler(function(error) {
+                    console.error('Error loading pelanggan table:', error);
+                })
+                .getAllPelanggan();
+        }
+
+        // Edit and Delete functions
+        function editPenjualan(id) {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    showEditModal('Edit Penjualan', generateEditForm('penjualan', data));
+                })
+                .withFailureHandler(function(error) {
+                    alert('Error loading data: ' + error.message);
+                })
+                .getPenjualanById(id);
+        }
+
+        function editPengeluaran(id) {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    showEditModal('Edit Pengeluaran', generateEditForm('pengeluaran', data));
+                })
+                .withFailureHandler(function(error) {
+                    alert('Error loading data: ' + error.message);
+                })
+                .getPengeluaranById(id);
+        }
+
+        function editProduk(id) {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    showEditModal('Edit Produk', generateEditForm('produk', data));
+                })
+                .withFailureHandler(function(error) {
+                    alert('Error loading data: ' + error.message);
+                })
+                .getProdukById(id);
+        }
+
+        function editPelanggan(id) {
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    showEditModal('Edit Pelanggan', generateEditForm('pelanggan', data));
+                })
+                .withFailureHandler(function(error) {
+                    alert('Error loading data: ' + error.message);
+                })
+                .getPelangganById(id);
+        }
+
+        function deletePenjualan(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data penjualan ini?')) {
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        if (result.success) {
+                            loadTables();
+                            loadDashboardData();
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        alert('Error: ' + error.message);
+                    })
+                    .deletePenjualan(id);
+            }
+        }
+
+        function deletePengeluaran(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus data pengeluaran ini?')) {
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        if (result.success) {
+                            loadTables();
+                            loadDashboardData();
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        alert('Error: ' + error.message);
+                    })
+                    .deletePengeluaran(id);
+            }
+        }
+
+        function deleteProduk(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        if (result.success) {
+                            loadProduk();
+                            loadTables();
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        alert('Error: ' + error.message);
+                    })
+                    .deleteProduk(id);
+        }
+
+        function deletePelanggan(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus pelanggan ini?')) {
+                google.script.run
+                    .withSuccessHandler(function(result) {
+                        if (result.success) {
+                            loadPelanggan();
+                            loadTables();
+                        } else {
+                            alert(result.message);
+                        }
+                    })
+                    .withFailureHandler(function(error) {
+                        alert('Error: ' + error.message);
+                    })
+                    .deletePelanggan(id);
+            }
+        }
+
+        function showEditModal(title, body) {
+            $('#editModalTitle').text(title);
+            $('#editModalBody').html(body);
+            $('#editModal').modal('show');
+        }
+
+        function generateEditForm(type, data) {
+            let form = '<form id="editForm">';
+
+            switch(type) {
+                case 'penjualan':
+                    form += `
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" name="Tanggal" value="${data.Tanggal || ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah</label>
+                            <input type="number" class="form-control" name="Jumlah" value="${data.Jumlah || ''}" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Harga</label>
+                            <input type="number" class="form-control" name="Harga" value="${data.Harga || ''}" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Rit</label>
+                            <input type="number" class="form-control" name="Rit" value="${data.Rit || ''}" min="1" required>
+                        </div>
+                    `;
+                    break;
+                case 'pengeluaran':
+                    form += `
+                        <div class="mb-3">
+                            <label class="form-label">Tanggal</label>
+                            <input type="date" class="form-control" name="Tanggal" value="${data.Tanggal || ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Jumlah</label>
+                            <input type="number" class="form-control" name="Jumlah" value="${data.Jumlah || ''}" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Deskripsi</label>
+                            <input type="text" class="form-control" name="Deskripsi" value="${data.Deskripsi || ''}" required>
+                        </div>
+                    `;
+                    break;
+                case 'produk':
+                    form += `
+                        <div class="mb-3">
+                            <label class="form-label">Nama</label>
+                            <input type="text" class="form-control" name="Nama" value="${data.Nama || ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Harga</label>
+                            <input type="number" class="form-control" name="Harga" value="${data.Harga || ''}" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Satuan</label>
+                            <input type="text" class="form-control" name="Satuan" value="${data.Satuan || ''}" required>
+                        </div>
+                    `;
+                    break;
+                case 'pelanggan':
+                    form += `
+                        <div class="mb-3">
+                            <label class="form-label">Nama</label>
+                            <input type="text" class="form-control" name="Nama" value="${data.Nama || ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Alamat</label>
+                            <input type="text" class="form-control" name="Alamat" value="${data.Alamat || ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Telepon</label>
+                            <input type="tel" class="form-control" name="Telepon" value="${data.Telepon || ''}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="Email" value="${data.Email || ''}">
+                        </div>
+                    `;
+                    break;
+            }
+
+            form += '</form>';
+            return form;
+        }
+
+        // Event handlers
+        $('#penjualanForm').on('submit', function(e) {
+            e.preventDefault();
+            createPenjualan();
+        });
+
+        $('#pengeluaranForm').on('submit', function(e) {
+            e.preventDefault();
+            createPengeluaran();
+        });
+
+        $('#produkForm').on('submit', function(e) {
+            e.preventDefault();
+            createProduk();
+        });
+
+        $('#pelangganForm').on('submit', function(e) {
+            e.preventDefault();
+            createPelanggan();
+        });
+
+        $('#kategoriPengeluaranForm').on('submit', function(e) {
+            e.preventDefault();
+            createKategoriPengeluaran();
+        });
+
+        $('#labaRugiFilterForm').on('submit', function(e) {
+            e.preventDefault();
+            calculateLabaRugi();
+        });
+
+        $('#rekapRitFilterForm').on('submit', function(e) {
+            e.preventDefault();
+            calculateRekapRit();
+        });
+
+        $('#saveEditBtn').on('click', function() {
+            saveEdit();
+        });
+
+        // Calculation functions
+        function calculateLabaRugi() {
+            const startDate = $('#labaRugiStartDate').val();
+            const endDate = $('#labaRugiEndDate').val();
+
+            if (!startDate || !endDate) {
+                showAlert('labaRugiAlert', 'danger', 'Tanggal mulai dan akhir harus diisi');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showAlert('labaRugiAlert', 'danger', 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir');
+                return;
+            }
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    showLoading(false);
+                    $('#labaRugiPenjualan').text(formatCurrency(data.totalPenjualan));
+                    $('#labaRugiPengeluaran').text(formatCurrency(data.totalPengeluaran));
+                    $('#labaRugiKotor').text(formatCurrency(data.labaKotor));
+
+                    showAlert('labaRugiAlert', 'success', `Laba rugi berhasil dihitung untuk periode ${formatDate(startDate)} - ${formatDate(endDate)}`);
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('labaRugiAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .calculateLabaRugi(startDate, endDate);
+        }
+
+        function calculateRekapRit() {
+            const startDate = $('#rekapRitStartDate').val();
+            const endDate = $('#rekapRitEndDate').val();
+
+            if (!startDate || !endDate) {
+                showAlert('rekapRitAlert', 'danger', 'Tanggal mulai dan akhir harus diisi');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showAlert('rekapRitAlert', 'danger', 'Tanggal mulai tidak boleh lebih besar dari tanggal akhir');
+                return;
+            }
+
+            showLoading(true);
+
+            google.script.run
+                .withSuccessHandler(function(data) {
+                    showLoading(false);
+                    $('#rekapRitTotal').text(data.totalRit);
+                    $('#rekapRitRetase').text(formatCurrency(data.totalRetase));
+                    $('#rekapRitRata').text(formatCurrency(data.rataRataPerRit));
+
+                    showAlert('rekapRitAlert', 'success', `Rekap rit berhasil dihitung untuk periode ${formatDate(startDate)} - ${formatDate(endDate)}`);
+                })
+                .withFailureHandler(function(error) {
+                    showLoading(false);
+                    showAlert('rekapRitAlert', 'danger', 'Terjadi kesalahan: ' + error.message);
+                })
+                .calculateRekapRit(startDate, endDate);
+        }
+
+        function saveEdit() {
+            const formData = $('#editForm').serializeArray();
+            const data = {};
+            formData.forEach(function(field) {
+                data[field.name] = field.value;
+            });
+
+            // Add current item ID (should be stored globally or in a hidden field)
+            // This would need to be implemented properly
+            $('#editModal').modal('hide');
+        }
+
+        // Utility functions
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR'
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID');
+        }
+
+        function generateGoogleMapsLink(address) {
+            return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address);
+        }
+
+        // Initialize DataTables
+        $('#penjualanTable, #pengeluaranTable, #produkTable, #pelangganTable').DataTable({
+            "pageLength": 10,
+            "lengthMenu": [10, 25, 50, 100],
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/id.json"
+            }
+        });
+    </script>
+</body>
+</html>
